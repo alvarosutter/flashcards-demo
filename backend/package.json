@@ -1,0 +1,55 @@
+{
+  "name": "flashcards-app-backend",
+  "version": "1.0.0",
+  "description": "Backend for the flashcard-app. Basic server with Rest API for the resources Deck, Card and Label.",
+  "main": "index.js",
+  "scripts": {
+    "start": "tsc-watch --outDir ./dist --onSuccess \"node ./dist/src/index.js\"",
+    "build": "tsc -b .",
+    "test": "jest -i --config ./jest.config.ts --verbose .*.test.ts",
+    "lint": "eslint \"./src/**/*.{js,jsx,ts,tsx,json}\" --parser-options={tsconfigRootDir:null}",
+    "lint-fix": "eslint --fix \"src/**/*.{js,jsx,ts,tsx,json}\" --parser-options={tsconfigRootDir:null}",
+    "prettier": "prettier --check \"src/**/*.{js,jsx,ts,tsx,json}\"",
+    "prettier-fix": "prettier --write \"src/**/*.{js,jsx,ts,tsx,json}\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alvarosutter/flashcards-app.git"
+  },
+  "author": "Alvaro Sutter",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/alvarosutter/flashcards-app/issues"
+  },
+  "homepage": "https://github.com/alvarosutter/flashcards-app#readme",
+  "dependencies": {
+    "@prisma/client": "^5.6.0",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "morgan": "^1.10.0",
+    "typescript": "^5.2.2"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.16",
+    "@types/express": "^4.17.21",
+    "@types/jest": "^29.5.10",
+    "@types/morgan": "^1.9.9",
+    "@types/node": "^20.9.1",
+    "@types/supertest": "^2.0.16",
+    "@typescript-eslint/eslint-plugin": "^6.11.0",
+    "@typescript-eslint/parser": "^6.11.0",
+    "eslint": "^8.53.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-airbnb-typescript": "^17.1.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-import": "^2.29.0",
+    "eslint-plugin-prettier": "^5.0.1",
+    "jest": "^29.7.0",
+    "prettier": "^3.1.0",
+    "prisma": "^5.6.0",
+    "supertest": "^6.3.3",
+    "ts-jest": "^29.1.1",
+    "ts-node": "^10.9.1",
+    "tsc-watch": "^6.0.4"
+  }
+}
