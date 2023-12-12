@@ -1,8 +1,7 @@
-import { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useContext, useState } from 'react';
 import { Deck } from '../../../types';
-import { deleteDeck } from '../../../services/FlashcardsApi/deck.services';
 import { DeleteForm } from '../../../components/form';
+import { dbContext } from '../../../context/DatabaseContext';
 
 interface DeleteDeckFormProps {
   deck: Deck;
@@ -13,20 +12,12 @@ interface DeleteDeckFormProps {
 function DeleteDeckForm({ deck, onSubmitForm, onCancel }: DeleteDeckFormProps) {
   const [formError, setFormError] = useState<undefined | string>();
 
-  const queryClient = useQueryClient();
-  const { mutateAsync: deleteDeckMutation } = useMutation({
-    mutationFn: deleteDeck,
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['decks'], exact: true });
-      await queryClient.invalidateQueries({ queryKey: ['label-cards'] });
-      await queryClient.invalidateQueries({ queryKey: ['labels'], exact: true });
-    },
-  });
+  const db = useContext(dbContext);
 
-  const submitHandler = async (event: React.FormEvent<HTMLFormElement>) => {
+  const submitHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    await deleteDeckMutation(deck.id);
+    db.actions.deleteDeck(deck.id);
     onSubmitForm();
   };
 

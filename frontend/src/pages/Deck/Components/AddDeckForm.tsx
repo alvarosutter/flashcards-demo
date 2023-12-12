@@ -1,7 +1,6 @@
-import { useState, useRef } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState, useRef, useContext } from 'react';
 import { Form, TextInput, CheckboxInput, FormError, ActionButton } from '../../../components/form';
-import { createDeck } from '../../../services/FlashcardsApi/deck.services';
+import { dbContext } from '../../../context/DatabaseContext';
 
 interface AddDeckFormProps {
   onSubmitForm: () => void;
@@ -12,26 +11,23 @@ function AddDeckForm({ onSubmitForm }: AddDeckFormProps) {
   const nameInputRef = useRef<HTMLInputElement>(null);
   const archivedInputRef = useRef<HTMLInputElement>(null);
 
-  const queryClient = useQueryClient();
-  const { mutateAsync: createDeckMutation } = useMutation({
-    mutationFn: createDeck,
-    onSuccess: async (deck) => {
-      await queryClient.setQueryData(['decks', deck.id], deck);
-      await queryClient.invalidateQueries({ queryKey: ['decks'], exact: true });
-    },
-  });
+  const db = useContext(dbContext);
 
-  const submitHandler = async (event: React.FormEvent<HTMLFormElement>) => {
+  const submitHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const name = nameInputRef.current?.value;
     const archived = archivedInputRef.current?.checked;
 
     const deck = {
+      id: crypto.randomUUID(),
       name: name!,
       archived: archived!,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      cards: [],
     };
 
-    await createDeckMutation(deck);
+    db.actions.addDeck(deck);
     onSubmitForm();
   };
 

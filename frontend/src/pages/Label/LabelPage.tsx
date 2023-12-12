@@ -1,25 +1,27 @@
-import { useEffect, useState } from 'react';
-import { useLocalStorage, useLabels } from '../../hooks';
+import { useContext, useEffect, useState } from 'react';
+import { useLocalStorage } from '../../hooks';
 import { SortOption, FilterValue, Label, SelectOption } from '../../types';
 import { sortDefaultOption, sortOptions } from '../../utils/sortOptions';
-import { Loader, Modal, QueryError } from '../../components/ui';
+import { Modal } from '../../components/ui';
 import LabelDashboardBar from './Components/LabelDashboardBar';
 import LabelGallery from './Components/LabelGallery';
 import AddLabelForm from './Components/AddLabelForm';
 import EditLabelForm from './Components/EditLabelForm';
 import DeleteLabelForm from './Components/DeleteLabelForm';
 import Cards from '../Card/Cards';
+import { dbContext } from '../../context/DatabaseContext';
 
 function LabelPage() {
   const { value: sortValue, setValue: setSortValue } = useLocalStorage('deck-sort', {
     ...sortDefaultOption,
   }) as SortOption;
   const { value: showEmpty, setValue: setShowEmpty } = useLocalStorage('show-archived', true) as FilterValue;
-  const { labels, status, error: queryError } = useLabels();
   const [addLabelVisible, setAddLabelVisible] = useState(false);
   const [editLabel, setEditLabel] = useState<Label | null>(null);
   const [deleteLabel, setDeleteLabel] = useState<Label | null>(null);
   const [selectedLabel, setSelectedLabel] = useState<Label | null>(null);
+  const db = useContext(dbContext);
+  const labels = db.actions.getLabels();
 
   function sortLabels(sortOption: SelectOption) {
     const option = sortOptions.filter((o) => o.value === sortOption?.value);
@@ -27,9 +29,6 @@ function LabelPage() {
   }
 
   useEffect(() => sortLabels(sortValue), [labels]);
-
-  if (status === 'pending') return <Loader />;
-  if (status === 'error') return <QueryError message={queryError.message} />;
 
   if (selectedLabel) {
     return <Cards item={selectedLabel} goBack={() => setSelectedLabel(null)} />;

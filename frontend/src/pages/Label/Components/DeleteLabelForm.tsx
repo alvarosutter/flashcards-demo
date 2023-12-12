@@ -1,8 +1,9 @@
-import { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useContext, useState } from 'react';
+
 import { DeleteForm } from '../../../components/form';
-import { deleteLabel } from '../../../services/FlashcardsApi/label.services';
+
 import { Label } from '../../../types';
+import { dbContext } from '../../../context/DatabaseContext';
 
 interface DeleteLabelFormProps {
   label: Label;
@@ -12,19 +13,12 @@ interface DeleteLabelFormProps {
 
 function DeleteLabelForm({ label, onSubmitForm, onCancel }: DeleteLabelFormProps) {
   const [formError, setFormError] = useState<undefined | string>();
+  const db = useContext(dbContext);
 
-  const queryClient = useQueryClient();
-  const { mutateAsync: deleteLabelMutation } = useMutation({
-    mutationFn: deleteLabel,
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['labels'], exact: true });
-    },
-  });
-
-  const submitHandler = async (event: React.FormEvent<HTMLFormElement>) => {
+  const submitHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    await deleteLabelMutation(label.id);
+    db.actions.deleteLabel(label.id);
     onSubmitForm();
   };
 

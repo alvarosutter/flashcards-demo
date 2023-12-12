@@ -1,11 +1,10 @@
-import { useRef, useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useContext, useRef, useState } from 'react';
 import styled from 'styled-components';
-import { patchCard } from '../../../services/FlashcardsApi/card.services';
 import { Form, ActionButton, FormError, TextAreaInput, TextInput, CancelButton } from '../../../components/form';
 import { Card, Deck, Label, SelectOption } from '../../../types';
 import LabelsSelect from './LabelsSelect';
 import mapToSelectOptions from '../../../utils/mapToSelectOptions';
+import { dbContext } from '../../../context/DatabaseContext';
 
 const ButtonContainer = styled.div`
   display: flex;
@@ -32,36 +31,31 @@ function EditCardForm({ card, onSubmitForm, labels, decks, onCancel }: EditCardF
   const nameInputRef = useRef<HTMLInputElement>(null);
   const contentInputRef = useRef<HTMLTextAreaElement>(null);
   let selectedLabels: string[] = card.labels.map((label) => label.name);
+  const db = useContext(dbContext);
 
-  const queryClient = useQueryClient();
-
-  const { mutateAsync: patchCardMutation } = useMutation({
-    mutationFn: (body: { name: string; content: string; labels: string[] }) => patchCard(card.id, body),
-    onSuccess: async (editedCard) => {
-      await queryClient.setQueryData(['deck-cards', cardDeck.name], [editedCard]);
-      await queryClient.invalidateQueries({ queryKey: ['deck-cards', cardDeck.name], exact: true });
-      await queryClient.invalidateQueries({ queryKey: ['decks'], exact: true });
-      await queryClient.invalidateQueries({ queryKey: ['label-cards'] });
-      await queryClient.invalidateQueries({ queryKey: ['labels'], exact: true });
-    },
-  });
-  const submitHandler = async (event: React.FormEvent<HTMLFormElement>) => {
+  const submitHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const name = nameInputRef.current?.value;
     const content = contentInputRef.current?.value;
 
+    const cardLabels = db.actions.getLabels().filter((l) => selectedLabels.some((e) => e === l.id));
+
     const editedCard = {
-      name: name ?? card.name,
-      content: content ?? card.content,
-      labels: selectedLabels,
+      id: card.id,
+      deckId: card.deckId,
+      name: name!,
+      content: content!,
+      createdAt: card.createdAt,
+      updatedAt: name !== card.name || content !== card.content ? new Date() : card.updatedAt,
+      labels: cardLabels,
     };
 
-    await patchCardMutation(editedCard);
+    db.actions.editCard(editedCard);
     onSubmitForm();
   };
 
   const handleSelectOnChange = (option: readonly SelectOption[] | SelectOption | null) => {
-    selectedLabels = [...(option as SelectOption[]).map((o) => o.label)];
+    selectedLabels = [...(option as SelectOption[]).map((o) => o.value)];
   };
 
   return (

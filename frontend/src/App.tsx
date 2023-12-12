@@ -7,6 +7,7 @@ import { darkTheme, lightTheme } from './theme';
 import DeckPage from './pages/Deck/DeckPage';
 import LabelPage from './pages/Label/LabelPage';
 import NotFoundPage from './pages/NotFound/NotFoundPage';
+import { DBProvider } from './context/DatabaseContext';
 
 function App() {
   const [darkMode, setMode] = useDarkMode();
@@ -19,16 +20,18 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <ThemeProvider theme={darkMode ? darkTheme : lightTheme}>
-          <FontStyles />
-          <GlobalStyle />
-          <Layout setMode={setMode} darkMode={darkMode}>
-            <Routes>
-              <Route path="/" element={<Navigate to="/decks" />} />
-              <Route path="/decks" element={<DeckPage />} />
-              <Route path="/labels" element={<LabelPage />} />
-              <Route path="*" element={<NotFoundPage />} />
-            </Routes>
-          </Layout>
+          <DBProvider>
+            <FontStyles />
+            <GlobalStyle />
+            <Layout setMode={setMode} darkMode={darkMode}>
+              <Routes>
+                <Route path="/" element={<Navigate to="/decks" />} />
+                <Route path="/decks" element={<DeckPage />} />
+                <Route path="/labels" element={<LabelPage />} />
+                <Route path="*" element={<NotFoundPage />} />
+              </Routes>
+            </Layout>
+          </DBProvider>
         </ThemeProvider>
       </BrowserRouter>
     </QueryClientProvider>

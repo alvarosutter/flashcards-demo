@@ -1,16 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import Modal from '../../components/ui/Modal';
 import AddCardForm from './Components/AddCardForm';
 import CardGallery from './Components/CardGallery';
 import CardSlider from './Components/CardSlider';
 import EditCardForm from './Components/EditCardForm';
-import { useCards, useDecks, useLabels, useLocalStorage } from '../../hooks';
+import { useLocalStorage } from '../../hooks';
 import { Card, Deck, Label, SelectOption, SortOption } from '../../types';
 import CardDashboardBar from './Components/CardDashboardBar';
 import { sortOptions, sortDefaultOption } from '../../utils/sortOptions';
 import { isDeck } from '../../utils/typeGuards';
-import { Loader, QueryError } from '../../components/ui';
 import DeleteCardForm from './Components/DeleteCardForm';
+import { dbContext } from '../../context/DatabaseContext';
 
 interface CardsProps {
   item: Deck | Label;
@@ -20,13 +20,14 @@ interface CardsProps {
 function Cards({ item, goBack }: CardsProps) {
   const { value: sortValue, setValue: setSortValue } = useLocalStorage('deck-sort', sortDefaultOption) as SortOption;
   const type = isDeck(item) ? 'deck' : 'label';
-  const { cards, status: cardsStatus, error: cardsQueryError } = useCards({ id: item.id, type, name: item.name });
-  const { labels, status: labelsStatus, error: labelsQueryError } = useLabels();
-  const { decks, status: decksStatus, error: decksQueryError } = useDecks();
   const [addCardVisible, setAddCardVisible] = useState(false);
   const [editCard, setEditCard] = useState<Card | null>(null);
   const [deleteCard, setDeleteCard] = useState<Card | null>(null);
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
+  const db = useContext(dbContext);
+  const { cards } = item;
+  const labels = db.actions.getLabels();
+  const decks = db.actions.getDecks();
 
   function sortCards(sortOption: SelectOption) {
     const option = sortOptions.filter((o) => o.value === sortOption?.value);
@@ -34,15 +35,6 @@ function Cards({ item, goBack }: CardsProps) {
   }
 
   useEffect(() => sortCards(sortValue), [cards]);
-
-  if (cardsStatus === 'pending' || labelsStatus === 'pending' || decksStatus === 'pending') return <Loader />;
-  if (cardsStatus === 'error' || labelsStatus === 'error' || decksStatus === 'error') {
-    return (
-      <QueryError
-        message={(cardsQueryError?.message && labelsQueryError?.message && decksQueryError?.message) ?? 'Unknown Error'}
-      />
-    );
-  }
 
   return (
     <>
@@ -110,7 +102,6 @@ function Cards({ item, goBack }: CardsProps) {
             setDeleteCard(null);
           }}
           card={deleteCard!}
-          decks={decks}
           onCancel={() => {
             setDeleteCard(null);
           }}

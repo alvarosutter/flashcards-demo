@@ -1,35 +1,22 @@
-import { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { deleteCard } from '../../../services/FlashcardsApi/card.services';
+import { useContext, useState } from 'react';
 import { DeleteForm } from '../../../components/form';
-import { Card, Deck } from '../../../types';
+import { Card } from '../../../types';
+import { dbContext } from '../../../context/DatabaseContext';
 
 interface DeleteCardFormProps {
   card: Card;
-  decks: Deck[];
   onSubmitForm: () => void;
   onCancel: () => void;
 }
 
-function DeleteCardForm({ card, decks, onSubmitForm, onCancel }: DeleteCardFormProps) {
+function DeleteCardForm({ card, onSubmitForm, onCancel }: DeleteCardFormProps) {
   const [formError, setFormError] = useState<undefined | string>();
-  const cardDeck = decks.find((deck) => deck.id === card.deckId)!;
+  const db = useContext(dbContext);
 
-  const queryClient = useQueryClient();
-
-  const { mutateAsync: deleteCardMutation } = useMutation({
-    mutationFn: deleteCard,
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['decks'], exact: true });
-      await queryClient.invalidateQueries({ queryKey: ['deck-cards', cardDeck.name], exact: true });
-      await queryClient.invalidateQueries({ queryKey: ['label-cards'] });
-      await queryClient.invalidateQueries({ queryKey: ['labels'], exact: true });
-    },
-  });
-  const submitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
+  const submitHandler = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    await deleteCardMutation(card.id);
+    db.actions.deleteCard(card);
     onSubmitForm();
   };
 

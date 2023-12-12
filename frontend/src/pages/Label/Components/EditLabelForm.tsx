@@ -1,9 +1,8 @@
-import { useRef, useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useContext, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { ActionButton, CancelButton, Form, FormError, TextInput } from '../../../components/form';
-import { patchLabel } from '../../../services/FlashcardsApi/label.services';
 import { Label } from '../../../types';
+import { dbContext } from '../../../context/DatabaseContext';
 
 const ButtonContainer = styled.div`
   display: flex;
@@ -25,24 +24,21 @@ interface EditLabelFormProps {
 function EditLabelForm({ label, onSubmitForm, onCancel }: EditLabelFormProps) {
   const [formError, setFormError] = useState<undefined | string>();
   const nameInputRef = useRef<HTMLInputElement>(null);
+  const db = useContext(dbContext);
 
-  const queryClient = useQueryClient();
-  const { mutateAsync: patchLabelMutation } = useMutation({
-    mutationFn: (body: { name: string }) => patchLabel(label.id, body),
-    onSuccess: async (editedLabel) => {
-      await queryClient.setQueryData(['labels', editedLabel.id], editedLabel);
-      await queryClient.invalidateQueries({ queryKey: ['labels'], exact: true });
-    },
-  });
-  const submitHandler = async (event: React.FormEvent<HTMLFormElement>) => {
+  const submitHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const name = nameInputRef.current?.value;
 
     const editedLabel = {
+      id: label.id,
       name: name!,
+      createdAt: label.createdAt,
+      updatedAt: name !== label.name ? new Date() : label.updatedAt,
+      cards: label.cards,
     };
 
-    await patchLabelMutation(editedLabel);
+    db.actions.editLabel(editedLabel);
     onSubmitForm();
   };
 

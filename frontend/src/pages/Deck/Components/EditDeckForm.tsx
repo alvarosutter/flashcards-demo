@@ -1,9 +1,8 @@
-import { useState, useRef } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState, useRef, useContext } from 'react';
 import styled from 'styled-components';
 import { ActionButton, CancelButton, CheckboxInput, Form, FormError, TextInput } from '../../../components/form';
-import { patchDeck } from '../../../services/FlashcardsApi/deck.services';
 import { Deck } from '../../../types';
+import { dbContext } from '../../../context/DatabaseContext';
 
 const ButtonContainer = styled.div`
   display: flex;
@@ -25,27 +24,23 @@ function EditDeckForm({ deck, onSubmitForm, onCancel }: EditDeckFormProps) {
   const [formError, setFormError] = useState<undefined | string>();
   const nameInputRef = useRef<HTMLInputElement>(null);
   const archivedInputRef = useRef<HTMLInputElement>(null);
+  const db = useContext(dbContext);
 
-  const queryClient = useQueryClient();
-  const { mutateAsync: patchDeckMutation } = useMutation({
-    mutationFn: (body: { name: string; archived: boolean }) => patchDeck(deck.id, body),
-    onSuccess: async (editedDeck) => {
-      await queryClient.setQueryData(['decks', editedDeck.id], editedDeck);
-      await queryClient.invalidateQueries({ queryKey: ['decks'], exact: true });
-    },
-  });
-
-  const submitHandler = async (event: React.FormEvent<HTMLFormElement>) => {
+  const submitHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const name = nameInputRef.current?.value;
     const archived = archivedInputRef.current?.checked;
 
     const editedDeck = {
+      id: deck.id,
       name: name!,
       archived: archived!,
+      createdAt: deck.createdAt,
+      updatedAt: name !== deck.name || archived !== deck.archived ? new Date() : deck.updatedAt,
+      cards: deck.cards,
     };
 
-    await patchDeckMutation(editedDeck);
+    db.actions.editDeck(editedDeck);
     onSubmitForm();
   };
 

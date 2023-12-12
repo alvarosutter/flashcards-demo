@@ -1,7 +1,6 @@
-import { useRef, useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createLabel } from '../../../services/FlashcardsApi/label.services';
+import { useContext, useRef, useState } from 'react';
 import { Form, ActionButton, FormError, TextInput } from '../../../components/form';
+import { dbContext } from '../../../context/DatabaseContext';
 
 interface AddLabelFormProps {
   onSubmitForm: () => void;
@@ -10,25 +9,21 @@ interface AddLabelFormProps {
 function AddLabelForm({ onSubmitForm }: AddLabelFormProps) {
   const [formError, setFormError] = useState<undefined | string>();
   const nameInputRef = useRef<HTMLInputElement>(null);
+  const db = useContext(dbContext);
 
-  const queryClient = useQueryClient();
-  const { mutateAsync: createLabelMutation } = useMutation({
-    mutationFn: createLabel,
-    onSuccess: async (label) => {
-      await queryClient.setQueryData(['labels', label.id], label);
-      await queryClient.invalidateQueries({ queryKey: ['labels'], exact: true });
-    },
-  });
-
-  const submitHandler = async (event: React.FormEvent<HTMLFormElement>) => {
+  const submitHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const name = nameInputRef.current?.value;
 
     const label = {
+      id: crypto.randomUUID(),
       name: name!,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      cards: [],
     };
 
-    await createLabelMutation(label);
+    db.actions.addLabel(label);
     onSubmitForm();
   };
 
