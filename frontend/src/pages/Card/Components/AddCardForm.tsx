@@ -24,7 +24,7 @@ function AddCardForm({ deckName, deckId, labels, onSubmitForm }: AddCardFormProp
     event.preventDefault();
     const name = nameInputRef.current?.value;
     const content = contentInputRef.current?.value;
-    const cardLabels = db.actions.getLabels().filter((l) => selectedLabels.some((e) => e === l.id));
+    const cardLabels = db.label.getLabels().filter((l) => selectedLabels.some((e) => e === l.id));
 
     const card = {
       id: crypto.randomUUID(),
@@ -36,7 +36,7 @@ function AddCardForm({ deckName, deckId, labels, onSubmitForm }: AddCardFormProp
       updatedAt: new Date(),
     };
 
-    db.actions.addCard(card);
+    db.card.createCard(card);
     onSubmitForm();
   };
 

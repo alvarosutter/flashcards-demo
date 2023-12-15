@@ -40,7 +40,7 @@ function EditDeckForm({ deck, onSubmitForm, onCancel }: EditDeckFormProps) {
       cards: deck.cards,
     };
 
-    db.actions.editDeck(editedDeck);
+    db.deck.patchDeck(editedDeck);
     onSubmitForm();
   };
 

@@ -16,7 +16,7 @@ function DeleteCardForm({ card, onSubmitForm, onCancel }: DeleteCardFormProps) {
   const submitHandler = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    db.actions.deleteCard(card);
+    db.card.deleteCard(card);
     onSubmitForm();
   };
 

@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
 import { useLocalStorage } from '../../hooks';
 import { SortOption, FilterValue, Deck, SelectOption } from '../../types';
 import { sortDefaultOption, sortOptions } from '../../utils/sortOptions';
@@ -21,14 +21,14 @@ function DeckPage() {
 
   const db = useContext(dbContext);
 
-  const decks = db.actions.getDecks();
+  const decks = db.deck.getDecks();
 
   function sortDecks(sortOption: SelectOption) {
     const option = sortOptions.filter((o) => o.value === sortOption?.value);
     decks.sort(option[0].func);
   }
 
-  useEffect(() => sortDecks(sortValue), [decks]);
+  sortDecks(sortValue);
 
   if (selectedDeck) {
     return (

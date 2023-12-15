@@ -27,7 +27,7 @@ function AddDeckForm({ onSubmitForm }: AddDeckFormProps) {
       cards: [],
     };
 
-    db.actions.addDeck(deck);
+    db.deck.createDeck(deck);
     onSubmitForm();
   };
 

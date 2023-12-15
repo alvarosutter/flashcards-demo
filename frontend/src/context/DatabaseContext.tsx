@@ -1,43 +1,46 @@
 import { createContext } from 'react';
 import { Card, Deck, Label } from '../types';
 import { useLocalStorage } from '../hooks';
+import { CardsInDeck, LabelsOnCard, cardsInDeckData, deckData, labelData, labelsOnCardData } from './database.helpers';
 
 type DbContext = {
-  actions: {
+  deck: {
     getDecks: () => Deck[];
-    addDeck: (deck: Deck) => void;
-    editDeck: (deck: Deck) => void;
+    createDeck: (deck: Deck) => void;
+    patchDeck: (deck: Deck) => void;
     deleteDeck: (id: string) => void;
-    getDeckCards: (id: string) => Card[];
-
+  };
+  label: {
     getLabels: () => Label[];
-    addLabel: (label: Label) => void;
-    editLabel: (label: Label) => void;
+    createLabel: (label: Label) => void;
+    patchLabel: (label: Label) => void;
     deleteLabel: (id: string) => void;
-    getLabelCards: (id: string) => Card[];
-
-    addCard: (card: Card) => void;
-    editCard: (card: Card) => void;
+  };
+  card: {
+    getCards: (type: string, id: string) => Card[];
+    createCard: (card: Card) => void;
+    patchCard: (card: Card) => void;
     deleteCard: (card: Card) => void;
   };
 };
 
 const initialDbContext = {
-  actions: {
+  deck: {
     getDecks: () => [],
-    addDeck: () => undefined,
-    editDeck: () => undefined,
+    createDeck: () => undefined,
+    patchDeck: () => undefined,
     deleteDeck: () => undefined,
-    getDeckCards: () => [],
-
+  },
+  label: {
     getLabels: () => [],
-    addLabel: () => undefined,
-    editLabel: () => undefined,
+    createLabel: () => undefined,
+    patchLabel: () => undefined,
     deleteLabel: () => undefined,
-    getLabelCards: () => [],
-
-    addCard: () => undefined,
-    editCard: () => undefined,
+  },
+  card: {
+    getCards: () => [],
+    createCard: () => undefined,
+    patchCard: () => undefined,
     deleteCard: () => undefined,
   },
 };
@@ -49,186 +52,192 @@ interface DBProviderProps {
   children: React.ReactNode;
 }
 export function DBProvider({ children }: DBProviderProps) {
-  const { value: decks, setValue: setDecks } = useLocalStorage('decks', []) as {
+  const { value: decks, setValue: setDecks } = useLocalStorage('decks', [deckData]) as {
     value: Deck[];
     setValue: React.Dispatch<React.SetStateAction<Deck[]>>;
   };
-  const { value: labels, setValue: setLabels } = useLocalStorage('labels', []) as {
+  const { value: labels, setValue: setLabels } = useLocalStorage('labels', [labelData]) as {
     value: Label[];
     setValue: React.Dispatch<React.SetStateAction<Label[]>>;
   };
-  const { value: cards, setValue: setCards } = useLocalStorage('cards', []) as {
-    value: Card[];
-    setValue: React.Dispatch<React.SetStateAction<Card[]>>;
+  const { value: labelsOnCard, setValue: setLabelsOnCard } = useLocalStorage('labelsOnCard', [labelsOnCardData]) as {
+    value: LabelsOnCard[];
+    setValue: React.Dispatch<React.SetStateAction<LabelsOnCard[]>>;
+  };
+  const { value: cardsInDeck, setValue: setCardsInDeck } = useLocalStorage('cardsInDeck', [cardsInDeckData]) as {
+    value: CardsInDeck[];
+    setValue: React.Dispatch<React.SetStateAction<CardsInDeck[]>>;
   };
 
-  const getDecks = () => {
-    return decks;
-  };
-
-  const addDeck = (deck: Deck) => {
-    decks.push(deck);
-    setDecks([...decks]);
-  };
-
-  const editDeck = (deck: Deck) => {
-    const decksList = decks;
-    const index = decksList.findIndex((d) => d.id === deck.id);
-    if (index !== -1) decksList.splice(index, 1, deck);
-
-    setDecks([...decksList]);
-  };
-
-  const deleteDeck = (id: string) => {
-    const decksList = decks;
-    const index = decksList.findIndex((d) => d.id === id);
-    if (index !== -1) decksList.splice(index, 1);
-
-    setCards([...cards.filter((c) => c.deckId === id)]);
-    setDecks([...decksList]);
-  };
-
-  const getDeckCards = (deckId: string) => {
-    const decksList = decks;
-    const deck = decksList.find((d) => d.id === deckId);
-
-    return deck!.cards;
+  const getCards = (type: string, id: string) => {
+    if (type === 'deck') {
+      return cardsInDeck.filter((e) => e.deckId === id).map((i) => i.card);
+    }
+    return labelsOnCard.filter((e) => e.labelId === id).map((i) => i.card);
   };
 
   const getLabels = () => {
-    return labels;
+    return labels.map((label) => ({ ...label, cards: getCards('label', label.id) }));
   };
 
-  const addLabel = (label: Label) => {
-    labels.push(label);
-    setLabels([...labels]);
+  const getDecks = () => {
+    return decks.map((deck) => ({ ...deck, cards: getCards('deck', deck.id) }));
   };
 
-  const editLabel = (label: Label) => {
-    const labelsList = labels;
-    const index = labelsList.findIndex((d) => d.id === label.id);
-    if (index !== -1) labelsList.splice(index, 1, label);
-
-    setLabels([...labelsList]);
+  const createDeck = (deck: Deck) => {
+    setDecks([...decks, deck]);
   };
 
-  const deleteLabel = (labelId: string) => {
-    const labelsList = labels;
-    const index = labelsList.findIndex((l) => l.id === labelId);
-    if (index !== -1) labelsList.splice(index, 1);
+  const patchDeck = (deck: Deck) => {
+    const unaffectedDecks: CardsInDeck[] = cardsInDeck.filter((i) => i.deckId !== deck.id);
+    const affectedDecks: CardsInDeck[] = cardsInDeck
+      .filter((i) => i.deckId === deck.id)
+      .map((e) => ({
+        ...e,
+        deck,
+      }));
 
-    setLabels([...labelsList]);
-
-    const cardsList = cards;
-    const labelCards = cardsList.filter((c) => c.labels.some((e) => e.id === labelId));
-    cardsList.forEach((card) => {
-      if (labelCards.includes(card)) {
-        const newCard = card;
-        const cardLabels = card.labels;
-        const i = cardLabels.findIndex((l) => l.id === labelId);
-        if (i !== -1) cardLabels.splice(i, 1);
-        newCard.labels = cardLabels;
-
-        // eslint-disable-next-line @typescript-eslint/no-use-before-define
-        editCard(newCard);
-      }
-    });
+    setCardsInDeck([...unaffectedDecks, ...affectedDecks]);
+    setDecks([...decks.filter((d) => d.id !== deck.id), deck]);
   };
 
-  const getLabelCards = (labelId: string) => {
-    const cardsList = cards;
-    const labelCards = cardsList.filter((c) => c.labels.some((e) => e.id === labelId));
-
-    return labelCards;
+  const deleteDeck = (id: string) => {
+    setLabelsOnCard([...labelsOnCard.filter((i) => i.card.deckId !== id)]);
+    setLabels([...getLabels()]);
+    setCardsInDeck([...cardsInDeck.filter((i) => i.deckId !== id)]);
+    setDecks([...decks.filter((d) => d.id !== id)]);
   };
 
-  const addCard = (card: Card) => {
-    const decksList = decks;
-    const cardsList = cards;
-
-    cardsList.push(card);
-
-    const deck = decksList.find((d) => d.id === card.deckId)!;
-    const index = decksList.findIndex((d) => d.id === card.deckId);
-    const deckCards = deck.cards;
-    deckCards.push(card);
-    deck.cards = deckCards;
-
-    if (index !== -1) decksList.splice(index, 1, deck);
-
-    setDecks([...decksList]);
-    setCards([...cardsList]);
+  const createLabel = (label: Label) => {
+    setLabels([...labels, label]);
   };
 
-  const editCard = (editedCard: Card) => {
-    const decksList = decks;
-    const cardsList = cards;
+  const patchLabel = (label: Label) => {
+    const cardsToEditIdList: string[] = labelsOnCard
+      .filter((i) => i.labelId === label.id)
+      .map((e) => e.card)
+      .map((c) => c.id);
 
-    const deck = decksList.find((d) => d.id === editedCard.deckId)!;
-    const deckIndex = decksList.findIndex((d) => d.id === editedCard.deckId);
+    const unaffectedLabels: LabelsOnCard[] = labelsOnCard.filter((i) => i.labelId !== label.id);
+    const affectedLabels: LabelsOnCard[] = labelsOnCard
+      .filter((i) => i.labelId === label.id)
+      .map((e) => ({
+        ...e,
+        label,
+      }));
+    const labelOnCardList = [...unaffectedLabels, ...affectedLabels];
+    setLabelsOnCard([...labelOnCardList]);
+    setLabels([...labels.filter((l) => l.id !== label.id), label]);
 
-    if (deckIndex !== -1) {
-      const deckCards = deck.cards;
+    const unaffectedCards = cardsInDeck.filter((i) => !cardsToEditIdList.includes(i.cardId));
+    const affectedCards = cardsInDeck
+      .filter((i) => cardsToEditIdList.includes(i.cardId))
+      .map((e) => ({
+        ...e,
+        card: {
+          ...e.card,
+          labels: labelOnCardList.filter((i) => i.cardId === e.cardId).map((i) => i.label),
+        },
+      }));
+    setCardsInDeck([...unaffectedCards, ...affectedCards]);
+    setDecks([...getDecks()]);
+  };
 
-      const cIndex = deckCards.findIndex((c) => c.id === editedCard.id);
-      if (cIndex !== -1) deckCards.splice(cIndex, 1, editedCard);
-      deck.cards = deckCards;
-      decksList.splice(deckIndex, 1, deck);
-    }
+  const deleteLabel = (id: string) => {
+    const cardsToEditIdList: string[] = labelsOnCard
+      .filter((i) => i.labelId === id)
+      .map((e) => e.card)
+      .map((c) => c.id);
+    const labelOnCardList = labelsOnCard.filter((i) => i.labelId !== id);
+    setLabelsOnCard([...labelOnCardList]);
+    setLabels([...labels.filter((l) => l.id !== id)]);
 
-    const cardIndex = cardsList.findIndex((c) => c.id === editedCard.id);
-    if (cardIndex !== -1) {
-      cardsList.splice(cardIndex, 1, editedCard);
-    }
+    const unaffectedCards = cardsInDeck.filter((i) => !cardsToEditIdList.includes(i.cardId));
+    const affectedCards = cardsInDeck
+      .filter((i) => cardsToEditIdList.includes(i.cardId))
+      .map((e) => ({
+        ...e,
+        card: {
+          ...e.card,
+          labels: labelOnCardList.filter((i) => i.cardId === e.cardId).map((i) => i.label),
+        },
+      }));
+    setCardsInDeck([...unaffectedCards, ...affectedCards]);
+    setDecks([...getDecks()]);
+  };
 
-    setDecks([...decksList]);
-    setCards([...cardsList]);
+  const createCard = (card: Card) => {
+    const labelsOnCardsList: LabelsOnCard[] = card.labels.map((l) => ({
+      card,
+      label: l,
+      cardId: card.id,
+      labelId: l.id,
+    }));
+    const cardsInDeckList: CardsInDeck[] = decks
+      .filter((d) => d.id === card.deckId)
+      .map((d) => ({
+        card,
+        deck: d,
+        cardId: card.id,
+        deckId: d.id,
+      }));
+
+    setLabelsOnCard([...labelsOnCard, ...labelsOnCardsList]);
+    setCardsInDeck([...cardsInDeck, ...cardsInDeckList]);
+    setLabels([...getLabels()]);
+    setDecks([...getDecks()]);
+  };
+
+  const patchCard = (card: Card) => {
+    const unaffectedLabelsOnCard: LabelsOnCard[] = labelsOnCard.filter((i) => i.cardId !== card.id);
+    const newLabelsOnCard: LabelsOnCard[] = card.labels.map((l) => ({
+      card,
+      label: l,
+      cardId: card.id,
+      labelId: l.id,
+    }));
+
+    setLabelsOnCard([...unaffectedLabelsOnCard, ...newLabelsOnCard]);
+    setLabels([...getLabels()]);
+
+    const updatedCardsInDeck = cardsInDeck
+      .filter((i) => i.cardId === card.id)
+      .map((e) => ({
+        ...e,
+        card,
+      }));
+    const unaffectedCardsInDeck = cardsInDeck.filter((i) => i.cardId !== card.id);
+    setCardsInDeck([...unaffectedCardsInDeck, ...updatedCardsInDeck]);
+    setDecks([...getDecks()]);
   };
 
   const deleteCard = (card: Card) => {
-    const decksList = decks;
-    const cardsList = cards;
-
-    const deck = decksList.find((d) => d.id === card.deckId)!;
-    const deckIndex = decksList.findIndex((d) => d.id === card.deckId);
-
-    if (deckIndex !== -1) {
-      const deckCards = deck.cards;
-
-      const cIndex = deckCards.findIndex((c) => c.id === card.id);
-      if (cIndex !== -1) deckCards.splice(cIndex, 1);
-      deck.cards = deckCards;
-      decksList.splice(deckIndex, 1, deck);
-    }
-
-    const cardIndex = cardsList.findIndex((c) => c.id === card.id);
-    if (cardIndex !== -1) {
-      cardsList.splice(cardIndex, 1);
-    }
-
-    setDecks([...decksList]);
-    setCards([...cardsList]);
+    setLabelsOnCard([...labelsOnCard.filter((i) => i.cardId !== card.id)]);
+    setLabels([...getLabels()]);
+    setCardsInDeck([...cardsInDeck.filter((i) => i.cardId !== card.id)]);
+    setDecks([...getDecks()]);
   };
 
   return (
     <dbContext.Provider
       // eslint-disable-next-line react/jsx-no-constructed-context-values
       value={{
-        actions: {
+        deck: {
           getDecks,
-          addDeck,
-          editDeck,
+          createDeck,
+          patchDeck,
           deleteDeck,
-          getDeckCards,
-
+        },
+        label: {
           getLabels,
-          addLabel,
-          editLabel,
+          createLabel,
+          patchLabel,
           deleteLabel,
-          getLabelCards,
-
-          addCard,
-          editCard,
+        },
+        card: {
+          getCards,
+          createCard,
+          patchCard,
           deleteCard,
         },
       }}

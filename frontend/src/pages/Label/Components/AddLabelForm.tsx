@@ -23,7 +23,7 @@ function AddLabelForm({ onSubmitForm }: AddLabelFormProps) {
       cards: [],
     };
 
-    db.actions.addLabel(label);
+    db.label.createLabel(label);
     onSubmitForm();
   };
 

@@ -18,7 +18,7 @@ function DeleteLabelForm({ label, onSubmitForm, onCancel }: DeleteLabelFormProps
   const submitHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    db.actions.deleteLabel(label.id);
+    db.label.deleteLabel(label.id);
     onSubmitForm();
   };
 

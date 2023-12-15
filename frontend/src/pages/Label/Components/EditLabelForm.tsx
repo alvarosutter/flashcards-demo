@@ -38,7 +38,7 @@ function EditLabelForm({ label, onSubmitForm, onCancel }: EditLabelFormProps) {
       cards: label.cards,
     };
 
-    db.actions.editLabel(editedLabel);
+    db.label.patchLabel(editedLabel);
     onSubmitForm();
   };
 

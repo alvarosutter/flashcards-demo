@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
 import { useLocalStorage } from '../../hooks';
 import { SortOption, FilterValue, Label, SelectOption } from '../../types';
 import { sortDefaultOption, sortOptions } from '../../utils/sortOptions';
@@ -12,7 +12,7 @@ import Cards from '../Card/Cards';
 import { dbContext } from '../../context/DatabaseContext';
 
 function LabelPage() {
-  const { value: sortValue, setValue: setSortValue } = useLocalStorage('deck-sort', {
+  const { value: sortValue, setValue: setSortValue } = useLocalStorage('label-sort', {
     ...sortDefaultOption,
   }) as SortOption;
   const { value: showEmpty, setValue: setShowEmpty } = useLocalStorage('show-archived', true) as FilterValue;
@@ -21,14 +21,14 @@ function LabelPage() {
   const [deleteLabel, setDeleteLabel] = useState<Label | null>(null);
   const [selectedLabel, setSelectedLabel] = useState<Label | null>(null);
   const db = useContext(dbContext);
-  const labels = db.actions.getLabels();
+  const labels = db.label.getLabels();
 
   function sortLabels(sortOption: SelectOption) {
     const option = sortOptions.filter((o) => o.value === sortOption?.value);
     labels.sort(option[0].func);
   }
 
-  useEffect(() => sortLabels(sortValue), [labels]);
+  sortLabels(sortValue);
 
   if (selectedLabel) {
     return <Cards item={selectedLabel} goBack={() => setSelectedLabel(null)} />;

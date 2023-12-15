@@ -38,7 +38,7 @@ function EditCardForm({ card, onSubmitForm, labels, decks, onCancel }: EditCardF
     const name = nameInputRef.current?.value;
     const content = contentInputRef.current?.value;
 
-    const cardLabels = db.actions.getLabels().filter((l) => selectedLabels.some((e) => e === l.id));
+    const cardLabels = db.label.getLabels().filter((l) => selectedLabels.some((e) => e === l.id));
 
     const editedCard = {
       id: card.id,
@@ -50,7 +50,7 @@ function EditCardForm({ card, onSubmitForm, labels, decks, onCancel }: EditCardF
       labels: cardLabels,
     };
 
-    db.actions.editCard(editedCard);
+    db.card.patchCard(editedCard);
     onSubmitForm();
   };
 

@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
 import Modal from '../../components/ui/Modal';
 import AddCardForm from './Components/AddCardForm';
 import CardGallery from './Components/CardGallery';
@@ -25,16 +25,16 @@ function Cards({ item, goBack }: CardsProps) {
   const [deleteCard, setDeleteCard] = useState<Card | null>(null);
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
   const db = useContext(dbContext);
-  const { cards } = item;
-  const labels = db.actions.getLabels();
-  const decks = db.actions.getDecks();
+  const cards = db.card.getCards(type, item.id);
+  const labels = db.label.getLabels();
+  const decks = db.deck.getDecks();
 
   function sortCards(sortOption: SelectOption) {
     const option = sortOptions.filter((o) => o.value === sortOption?.value);
     cards.sort(option[0].func);
   }
 
-  useEffect(() => sortCards(sortValue), [cards]);
+  sortCards(sortValue);
 
   return (
     <>

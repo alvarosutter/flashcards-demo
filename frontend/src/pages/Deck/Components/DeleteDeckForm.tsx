@@ -17,7 +17,7 @@ function DeleteDeckForm({ deck, onSubmitForm, onCancel }: DeleteDeckFormProps) {
   const submitHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    db.actions.deleteDeck(deck.id);
+    db.deck.deleteDeck(deck.id);
     onSubmitForm();
   };
 
