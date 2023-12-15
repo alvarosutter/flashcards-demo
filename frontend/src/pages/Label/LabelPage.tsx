@@ -15,7 +15,7 @@ function LabelPage() {
   const { value: sortValue, setValue: setSortValue } = useLocalStorage('label-sort', {
     ...sortDefaultOption,
   }) as SortOption;
-  const { value: showEmpty, setValue: setShowEmpty } = useLocalStorage('show-archived', true) as FilterValue;
+  const { value: showEmpty, setValue: setShowEmpty } = useLocalStorage('show-empty', true) as FilterValue;
   const [addLabelVisible, setAddLabelVisible] = useState(false);
   const [editLabel, setEditLabel] = useState<Label | null>(null);
   const [deleteLabel, setDeleteLabel] = useState<Label | null>(null);
