@@ -1,9 +1,8 @@
 import { useContext, useState } from 'react';
 
 import { DeleteForm } from '../../../components/form';
-
-import { Label } from '../../../types';
 import { dbContext } from '../../../context/DatabaseContext';
+import type { Label } from '../../../types';
 
 interface DeleteLabelFormProps {
   label: Label;

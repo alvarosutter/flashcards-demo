@@ -1,4 +1,5 @@
 import { useContext, useRef, useState } from 'react';
+
 import { Form, ActionButton, FormError, TextInput } from '../../../components/form';
 import { dbContext } from '../../../context/DatabaseContext';
 
@@ -29,7 +30,15 @@ function AddLabelForm({ onSubmitForm }: AddLabelFormProps) {
 
   return (
     <Form onSubmit={submitHandler} onBlur={() => setFormError(undefined)}>
-      <TextInput label="Name" name="label-name" ref={nameInputRef} type="text" maxLength={15} required autoFocus />
+      <TextInput
+        label="Name"
+        name="label-name"
+        ref={nameInputRef}
+        type="text"
+        maxLength={15}
+        required
+        autoFocus
+      />
       {formError && <FormError>{formError}</FormError>}
       <ActionButton style={{ margin: '25px 0 15px' }} type="submit">
         Add Label

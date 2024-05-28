@@ -1,7 +1,8 @@
 import { useContext, useState } from 'react';
-import { Deck } from '../../../types';
+
 import { DeleteForm } from '../../../components/form';
 import { dbContext } from '../../../context/DatabaseContext';
+import type { Deck } from '../../../types';
 
 interface DeleteDeckFormProps {
   deck: Deck;

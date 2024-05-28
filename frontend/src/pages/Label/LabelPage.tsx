@@ -1,21 +1,25 @@
 import { useContext, useState } from 'react';
-import { useLocalStorage } from '../../hooks';
-import { SortOption, FilterValue, Label, SelectOption } from '../../types';
-import { sortDefaultOption, sortOptions } from '../../utils/sortOptions';
-import { Modal } from '../../components/ui';
+
+import AddLabelForm from './Components/AddLabelForm';
+import DeleteLabelForm from './Components/DeleteLabelForm';
+import EditLabelForm from './Components/EditLabelForm';
 import LabelDashboardBar from './Components/LabelDashboardBar';
 import LabelGallery from './Components/LabelGallery';
-import AddLabelForm from './Components/AddLabelForm';
-import EditLabelForm from './Components/EditLabelForm';
-import DeleteLabelForm from './Components/DeleteLabelForm';
-import Cards from '../Card/Cards';
+import { Modal } from '../../components/ui';
 import { dbContext } from '../../context/DatabaseContext';
+import { useLocalStorage } from '../../hooks';
+import type { SortOption, FilterValue, Label, SelectOption } from '../../types';
+import { sortDefaultOption, sortOptions } from '../../utils/sortOptions';
+import Cards from '../Card/Cards';
 
 function LabelPage() {
   const { value: sortValue, setValue: setSortValue } = useLocalStorage('label-sort', {
     ...sortDefaultOption,
   }) as SortOption;
-  const { value: showEmpty, setValue: setShowEmpty } = useLocalStorage('show-empty', true) as FilterValue;
+  const { value: showEmpty, setValue: setShowEmpty } = useLocalStorage(
+    'show-empty',
+    true,
+  ) as FilterValue;
   const [addLabelVisible, setAddLabelVisible] = useState(false);
   const [editLabel, setEditLabel] = useState<Label | null>(null);
   const [deleteLabel, setDeleteLabel] = useState<Label | null>(null);

@@ -1,7 +1,8 @@
 import { useContext, useState } from 'react';
+
 import { DeleteForm } from '../../../components/form';
-import { Card } from '../../../types';
 import { dbContext } from '../../../context/DatabaseContext';
+import type { Card } from '../../../types';
 
 interface DeleteCardFormProps {
   card: Card;

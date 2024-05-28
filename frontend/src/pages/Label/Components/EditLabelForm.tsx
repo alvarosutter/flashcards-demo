@@ -1,8 +1,9 @@
 import { useContext, useRef, useState } from 'react';
 import styled from 'styled-components';
+
 import { ActionButton, CancelButton, Form, FormError, TextInput } from '../../../components/form';
-import { Label } from '../../../types';
 import { dbContext } from '../../../context/DatabaseContext';
+import type { Label } from '../../../types';
 
 const ButtonContainer = styled.div`
   display: flex;

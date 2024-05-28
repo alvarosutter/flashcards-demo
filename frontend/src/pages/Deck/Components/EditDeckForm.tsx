@@ -1,8 +1,16 @@
 import { useState, useRef, useContext } from 'react';
 import styled from 'styled-components';
-import { ActionButton, CancelButton, CheckboxInput, Form, FormError, TextInput } from '../../../components/form';
-import { Deck } from '../../../types';
+
+import {
+  ActionButton,
+  CancelButton,
+  CheckboxInput,
+  Form,
+  FormError,
+  TextInput,
+} from '../../../components/form';
 import { dbContext } from '../../../context/DatabaseContext';
+import type { Deck } from '../../../types';
 
 const ButtonContainer = styled.div`
   display: flex;

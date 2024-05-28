@@ -1,23 +1,25 @@
 import { createContext } from 'react';
-import { Card, Deck, Label } from '../types';
+
+import type { CardsInDeck, LabelsOnCard } from './database.helpers';
+import { cardsInDeckData, deckData, labelData, labelsOnCardData } from './database.helpers';
 import { useLocalStorage } from '../hooks';
-import { CardsInDeck, LabelsOnCard, cardsInDeckData, deckData, labelData, labelsOnCardData } from './database.helpers';
+import type { Card, Deck, Label } from '../types';
 
 type DbContext = {
   deck: {
-    getDecks: () => Deck[];
+    getDecks: () => Array<Deck>;
     createDeck: (deck: Deck) => void;
     patchDeck: (deck: Deck) => void;
     deleteDeck: (id: string) => void;
   };
   label: {
-    getLabels: () => Label[];
+    getLabels: () => Array<Label>;
     createLabel: (label: Label) => void;
     patchLabel: (label: Label) => void;
     deleteLabel: (id: string) => void;
   };
   card: {
-    getCards: (type: string, id: string) => Card[];
+    getCards: (type: string, id: string) => Array<Card>;
     createCard: (card: Card) => void;
     patchCard: (card: Card) => void;
     deleteCard: (card: Card) => void;
@@ -53,20 +55,24 @@ interface DBProviderProps {
 }
 export function DBProvider({ children }: DBProviderProps) {
   const { value: decks, setValue: setDecks } = useLocalStorage('decks', [deckData]) as {
-    value: Deck[];
-    setValue: React.Dispatch<React.SetStateAction<Deck[]>>;
+    value: Array<Deck>;
+    setValue: React.Dispatch<React.SetStateAction<Array<Deck>>>;
   };
   const { value: labels, setValue: setLabels } = useLocalStorage('labels', [labelData]) as {
-    value: Label[];
-    setValue: React.Dispatch<React.SetStateAction<Label[]>>;
+    value: Array<Label>;
+    setValue: React.Dispatch<React.SetStateAction<Array<Label>>>;
   };
-  const { value: labelsOnCard, setValue: setLabelsOnCard } = useLocalStorage('labelsOnCard', [labelsOnCardData]) as {
-    value: LabelsOnCard[];
-    setValue: React.Dispatch<React.SetStateAction<LabelsOnCard[]>>;
+  const { value: labelsOnCard, setValue: setLabelsOnCard } = useLocalStorage('labelsOnCard', [
+    labelsOnCardData,
+  ]) as {
+    value: Array<LabelsOnCard>;
+    setValue: React.Dispatch<React.SetStateAction<Array<LabelsOnCard>>>;
   };
-  const { value: cardsInDeck, setValue: setCardsInDeck } = useLocalStorage('cardsInDeck', [cardsInDeckData]) as {
-    value: CardsInDeck[];
-    setValue: React.Dispatch<React.SetStateAction<CardsInDeck[]>>;
+  const { value: cardsInDeck, setValue: setCardsInDeck } = useLocalStorage('cardsInDeck', [
+    cardsInDeckData,
+  ]) as {
+    value: Array<CardsInDeck>;
+    setValue: React.Dispatch<React.SetStateAction<Array<CardsInDeck>>>;
   };
 
   const getCards = (type: string, id: string) => {
@@ -76,21 +82,17 @@ export function DBProvider({ children }: DBProviderProps) {
     return labelsOnCard.filter((e) => e.labelId === id).map((i) => i.card);
   };
 
-  const getLabels = () => {
-    return labels.map((label) => ({ ...label, cards: getCards('label', label.id) }));
-  };
+  const getLabels = () => labels.map((label) => ({ ...label, cards: getCards('label', label.id) }));
 
-  const getDecks = () => {
-    return decks.map((deck) => ({ ...deck, cards: getCards('deck', deck.id) }));
-  };
+  const getDecks = () => decks.map((deck) => ({ ...deck, cards: getCards('deck', deck.id) }));
 
   const createDeck = (deck: Deck) => {
     setDecks([...decks, deck]);
   };
 
   const patchDeck = (deck: Deck) => {
-    const unaffectedDecks: CardsInDeck[] = cardsInDeck.filter((i) => i.deckId !== deck.id);
-    const affectedDecks: CardsInDeck[] = cardsInDeck
+    const unaffectedDecks: Array<CardsInDeck> = cardsInDeck.filter((i) => i.deckId !== deck.id);
+    const affectedDecks: Array<CardsInDeck> = cardsInDeck
       .filter((i) => i.deckId === deck.id)
       .map((e) => ({
         ...e,
@@ -113,13 +115,15 @@ export function DBProvider({ children }: DBProviderProps) {
   };
 
   const patchLabel = (label: Label) => {
-    const cardsToEditIdList: string[] = labelsOnCard
+    const cardsToEditIdList: Array<string> = labelsOnCard
       .filter((i) => i.labelId === label.id)
       .map((e) => e.card)
       .map((c) => c.id);
 
-    const unaffectedLabels: LabelsOnCard[] = labelsOnCard.filter((i) => i.labelId !== label.id);
-    const affectedLabels: LabelsOnCard[] = labelsOnCard
+    const unaffectedLabels: Array<LabelsOnCard> = labelsOnCard.filter(
+      (i) => i.labelId !== label.id,
+    );
+    const affectedLabels: Array<LabelsOnCard> = labelsOnCard
       .filter((i) => i.labelId === label.id)
       .map((e) => ({
         ...e,
@@ -144,7 +148,7 @@ export function DBProvider({ children }: DBProviderProps) {
   };
 
   const deleteLabel = (id: string) => {
-    const cardsToEditIdList: string[] = labelsOnCard
+    const cardsToEditIdList: Array<string> = labelsOnCard
       .filter((i) => i.labelId === id)
       .map((e) => e.card)
       .map((c) => c.id);
@@ -167,13 +171,13 @@ export function DBProvider({ children }: DBProviderProps) {
   };
 
   const createCard = (card: Card) => {
-    const labelsOnCardsList: LabelsOnCard[] = card.labels.map((l) => ({
+    const labelsOnCardsList: Array<LabelsOnCard> = card.labels.map((l) => ({
       card,
       label: l,
       cardId: card.id,
       labelId: l.id,
     }));
-    const cardsInDeckList: CardsInDeck[] = decks
+    const cardsInDeckList: Array<CardsInDeck> = decks
       .filter((d) => d.id === card.deckId)
       .map((d) => ({
         card,
@@ -189,8 +193,10 @@ export function DBProvider({ children }: DBProviderProps) {
   };
 
   const patchCard = (card: Card) => {
-    const unaffectedLabelsOnCard: LabelsOnCard[] = labelsOnCard.filter((i) => i.cardId !== card.id);
-    const newLabelsOnCard: LabelsOnCard[] = card.labels.map((l) => ({
+    const unaffectedLabelsOnCard: Array<LabelsOnCard> = labelsOnCard.filter(
+      (i) => i.cardId !== card.id,
+    );
+    const newLabelsOnCard: Array<LabelsOnCard> = card.labels.map((l) => ({
       card,
       label: l,
       cardId: card.id,

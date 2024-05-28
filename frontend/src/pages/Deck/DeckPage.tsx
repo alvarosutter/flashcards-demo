@@ -1,19 +1,26 @@
 import { useContext, useState } from 'react';
-import { useLocalStorage } from '../../hooks';
-import { SortOption, FilterValue, Deck, SelectOption } from '../../types';
-import { sortDefaultOption, sortOptions } from '../../utils/sortOptions';
+
+import AddDeckForm from './Components/AddDeckForm';
 import DeckDashboardBar from './Components/DeckDashboardBar';
 import DeckGallery from './Components/DeckGallery';
-import AddDeckForm from './Components/AddDeckForm';
-import EditDeckForm from './Components/EditDeckForm';
 import DeleteDeckForm from './Components/DeleteDeckForm';
-import Cards from '../Card/Cards';
-import { dbContext } from '../../context/DatabaseContext';
+import EditDeckForm from './Components/EditDeckForm';
 import { Modal } from '../../components/ui';
+import { dbContext } from '../../context/DatabaseContext';
+import { useLocalStorage } from '../../hooks';
+import type { SortOption, FilterValue, Deck, SelectOption } from '../../types';
+import { sortDefaultOption, sortOptions } from '../../utils/sortOptions';
+import Cards from '../Card/Cards';
 
 function DeckPage() {
-  const { value: sortValue, setValue: setSortValue } = useLocalStorage('deck-sort', sortDefaultOption) as SortOption;
-  const { value: showArchived, setValue: setShowArchived } = useLocalStorage('show-archived', true) as FilterValue;
+  const { value: sortValue, setValue: setSortValue } = useLocalStorage(
+    'deck-sort',
+    sortDefaultOption,
+  ) as SortOption;
+  const { value: showArchived, setValue: setShowArchived } = useLocalStorage(
+    'show-archived',
+    true,
+  ) as FilterValue;
   const [addDeckVisible, setAddDeckVisible] = useState(false);
   const [editDeck, setEditDeck] = useState<Deck | null>(null);
   const [deleteDeck, setDeleteDeck] = useState<Deck | null>(null);

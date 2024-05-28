@@ -1,16 +1,17 @@
 import { useContext, useState } from 'react';
-import Modal from '../../components/ui/Modal';
+
 import AddCardForm from './Components/AddCardForm';
+import CardDashboardBar from './Components/CardDashboardBar';
 import CardGallery from './Components/CardGallery';
 import CardSlider from './Components/CardSlider';
+import DeleteCardForm from './Components/DeleteCardForm';
 import EditCardForm from './Components/EditCardForm';
+import Modal from '../../components/ui/Modal';
+import { dbContext } from '../../context/DatabaseContext';
 import { useLocalStorage } from '../../hooks';
-import { Card, Deck, Label, SelectOption, SortOption } from '../../types';
-import CardDashboardBar from './Components/CardDashboardBar';
+import type { Card, Deck, Label, SelectOption, SortOption } from '../../types';
 import { sortOptions, sortDefaultOption } from '../../utils/sortOptions';
 import { isDeck } from '../../utils/typeGuards';
-import DeleteCardForm from './Components/DeleteCardForm';
-import { dbContext } from '../../context/DatabaseContext';
 
 interface CardsProps {
   item: Deck | Label;
@@ -18,7 +19,10 @@ interface CardsProps {
 }
 
 function Cards({ item, goBack }: CardsProps) {
-  const { value: sortValue, setValue: setSortValue } = useLocalStorage('card-sort', sortDefaultOption) as SortOption;
+  const { value: sortValue, setValue: setSortValue } = useLocalStorage(
+    'card-sort',
+    sortDefaultOption,
+  ) as SortOption;
   const type = isDeck(item) ? 'deck' : 'label';
   const [addCardVisible, setAddCardVisible] = useState(false);
   const [editCard, setEditCard] = useState<Card | null>(null);

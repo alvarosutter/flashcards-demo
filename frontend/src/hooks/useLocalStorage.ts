@@ -1,5 +1,6 @@
-import { useCallback, useState, useEffect } from 'react';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { stringify, parse } from 'flatted';
+import { useCallback, useState, useEffect } from 'react';
 
 function getSavedValue(key: string, initialValue: unknown) {
   const jsonValue = localStorage.getItem(key);
@@ -19,6 +20,7 @@ function useLocalStorage(key: string, initialValue: unknown) {
 
   const remove = useCallback(() => {
     localStorage.removeItem(key);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return { value, setValue, remove };

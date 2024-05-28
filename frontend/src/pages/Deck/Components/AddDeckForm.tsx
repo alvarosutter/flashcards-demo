@@ -1,4 +1,5 @@
 import { useState, useRef, useContext } from 'react';
+
 import { Form, TextInput, CheckboxInput, FormError, ActionButton } from '../../../components/form';
 import { dbContext } from '../../../context/DatabaseContext';
 
@@ -39,8 +40,21 @@ function AddDeckForm({ onSubmitForm }: AddDeckFormProps) {
         onBlur={() => setFormError(undefined)}
         style={{ flexDirection: 'row' }}
       >
-        <TextInput label="Name" name="deck-name" ref={nameInputRef} type="text" maxLength={15} required autoFocus />
-        <CheckboxInput label="Archived" name="deck-archived" ref={archivedInputRef} type="checkbox" />
+        <TextInput
+          label="Name"
+          name="deck-name"
+          ref={nameInputRef}
+          type="text"
+          maxLength={15}
+          required
+          autoFocus
+        />
+        <CheckboxInput
+          label="Archived"
+          name="deck-archived"
+          ref={archivedInputRef}
+          type="checkbox"
+        />
         {formError && <FormError>{formError}</FormError>}
       </Form>
       <ActionButton form="addDeck" style={{ margin: '25px 0 15px' }} type="submit">
